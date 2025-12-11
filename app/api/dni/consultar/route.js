@@ -1,0 +1,160 @@
+// app/api/dni/consultar/route.js
+import { NextResponse } from 'next/server';
+import pool from '@/lib/db';
+import { verifyToken, extractToken } from '@/lib/jwt';
+import { consultarDNI, validarDNI } from '@/lib/apiPeru';
+import { encryptJSON } from '@/lib/crypto';
+
+export async function POST(request) {
+  try {
+    // Verificar autenticación
+    const authHeader = request.headers.get('authorization');
+    const token = extractToken(authHeader);
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Token requerido' }, 
+        { status: 401 }
+      );
+    }
+
+    let userPayload;
+    try {
+      userPayload = verifyToken(token);
+    } catch (error) {
+      console.error('[Auth Error] Token inválido:', error.message);
+      return NextResponse.json(
+        { success: false, error: 'Token inválido o expirado' }, 
+        { status: 403 }
+      );
+    }
+
+    // Obtener y validar DNI del body
+    const body = await request.json();
+    const { dni } = body;
+
+    if (!validarDNI(dni)) {
+      return NextResponse.json(
+        { success: false, error: 'DNI inválido. Debe tener 8 dígitos numéricos' }, 
+        { status: 400 }
+      );
+    }
+
+    console.log(`[DNI Consulta] Usuario ${userPayload.id} consultando DNI ${dni}`);
+
+    // Consultar API Perú
+    let datosReniec;
+    try {
+      datosReniec = await consultarDNI(dni);
+
+      if (!datosReniec || !datosReniec.nombres) {
+        return NextResponse.json(
+          { success: false, error: 'No se encontraron datos para este DNI' }, 
+          { status: 404 }
+        );
+      }
+    } catch (error) {
+      console.error('[API Peru] Error:', error.message);
+      
+      // Manejo específico de errores
+      if (error.message.includes('no encontrado')) {
+        return NextResponse.json(
+          { success: false, error: 'DNI no encontrado en RENIEC' }, 
+          { status: 404 }
+        );
+      }
+      
+      if (error.message.includes('Token')) {
+        return NextResponse.json(
+          { success: false, error: 'Error de configuración del servidor (Token API inválido)' }, 
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(
+        { success: false, error: 'Error al consultar datos del DNI. Intente nuevamente.' }, 
+        { status: 500 }
+      );
+    }
+
+    // Preparar datos a cifrar
+    const datosACifrar = {
+      nombres: datosReniec.nombres,
+      apellidoPaterno: datosReniec.apellidoPaterno,
+      apellidoMaterno: datosReniec.apellidoMaterno,
+      nombreCompleto: datosReniec.nombreCompleto
+    };
+
+    console.log('[DNI] Datos obtenidos:', datosACifrar.nombreCompleto);
+
+    // Cifrar datos
+    let encrypted, iv, authTag;
+    try {
+      const cifrado = encryptJSON(datosACifrar);
+      encrypted = cifrado.encrypted;
+      iv = cifrado.iv;
+      authTag = cifrado.authTag;
+    } catch (cryptoError) {
+      console.error('[Crypto Error]', cryptoError.message);
+      return NextResponse.json(
+        { success: false, error: 'Error al cifrar datos' }, 
+        { status: 500 }
+      );
+    }
+
+    // Guardar en PostgreSQL
+    let record;
+    try {
+      const result = await pool.query(
+        `INSERT INTO dni_records (user_id, dni, encrypted_data, iv, auth_tag)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (user_id, dni)
+         DO UPDATE SET
+           encrypted_data = EXCLUDED.encrypted_data,
+           iv = EXCLUDED.iv,
+           auth_tag = EXCLUDED.auth_tag,
+           updated_at = CURRENT_TIMESTAMP
+         RETURNING id, dni, created_at`,
+        [userPayload.id, dni, encrypted, iv, authTag]
+      );
+      record = result.rows[0];
+      console.log('[DB] Registro guardado con ID:', record.id);
+    } catch (dbError) {
+      console.error('[DB Error]', dbError.message);
+      return NextResponse.json(
+        { success: false, error: 'Error al guardar en base de datos' }, 
+        { status: 500 }
+      );
+    }
+
+    // Registrar en audit_log
+    try {
+      await pool.query(
+        'INSERT INTO audit_log (user_id, action, dni) VALUES ($1, $2, $3)',
+        [userPayload.id, 'CONSULTA_DNI', dni]
+      );
+    } catch (auditError) {
+      console.error('[Audit Log] Error:', auditError.message);
+      // No es crítico, continuar
+    }
+
+    // Respuesta exitosa
+    return NextResponse.json({
+      success: true,
+      message: 'DNI consultado y guardado exitosamente',
+      record: {
+        id: record.id,
+        dni: record.dni,
+        createdAt: record.created_at
+      },
+      datos: datosACifrar
+    });
+
+  } catch (error) {
+    console.error('[Server Error] Error inesperado:', error);
+    return NextResponse.json(
+      { success: false, error: 'Error interno del servidor' }, 
+      { status: 500 }
+    );
+  }
+}
