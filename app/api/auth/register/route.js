@@ -1,8 +1,9 @@
-// app/api/auth/register/route.js - Registro de usuarios
+// app/api/auth/register/route.js - Registro con encriptación
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import pool from '@/lib/db';
 import { generateToken } from '@/lib/jwt';
+import { encryptJSON } from '@/lib/crypto';
 
 export async function POST(request) {
   try {
@@ -23,7 +24,6 @@ export async function POST(request) {
       );
     }
 
-    // Validar formato email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -32,10 +32,12 @@ export async function POST(request) {
       );
     }
 
+    const emailLower = email.toLowerCase();
+
     // Verificar si el email ya existe
     const existingUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email.toLowerCase()]
+      'SELECT id FROM users WHERE email LIKE $1',
+      [`%"plain":"${emailLower}"%`]
     );
 
     if (existingUser.rows.length > 0) {
@@ -48,10 +50,33 @@ export async function POST(request) {
     // Hash de la contraseña
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Insertar usuario
+    // Encriptar email
+    const emailEncrypted = encryptJSON({ email: emailLower });
+
+    // Encriptar nombre completo si existe
+    let fullNameData = null;
+    if (fullName) {
+      const fullNameEncrypted = encryptJSON({ fullName });
+      fullNameData = JSON.stringify({
+        encrypted: fullNameEncrypted.encrypted,
+        iv: fullNameEncrypted.iv,
+        authTag: fullNameEncrypted.authTag
+      });
+    }
+
+    // Guardar usuario con datos encriptados
     const result = await pool.query(
-      'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email, full_name, created_at',
-      [email.toLowerCase(), passwordHash, fullName || null]
+      'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, created_at',
+      [
+        JSON.stringify({
+          plain: emailLower,
+          encrypted: emailEncrypted.encrypted,
+          iv: emailEncrypted.iv,
+          authTag: emailEncrypted.authTag
+        }),
+        passwordHash,
+        fullNameData
+      ]
     );
 
     const user = result.rows[0];
@@ -59,7 +84,7 @@ export async function POST(request) {
     // Generar token JWT
     const token = generateToken({
       id: user.id,
-      email: user.email
+      email: emailLower
     });
 
     return NextResponse.json({
@@ -68,8 +93,8 @@ export async function POST(request) {
       token,
       user: {
         id: user.id,
-        email: user.email,
-        fullName: user.full_name,
+        email: emailLower,
+        fullName: fullName || null,
         createdAt: user.created_at
       }
     }, { status: 201 });

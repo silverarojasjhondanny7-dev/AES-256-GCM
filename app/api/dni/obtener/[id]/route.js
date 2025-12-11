@@ -1,4 +1,4 @@
-// app/api/dni/obtener/[id]/route.js - Obtener DNI descifrado
+// app/api/dni/obtener/[id]/route.js - Obtener DNI desencriptado
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { verifyToken, extractToken } from '@/lib/jwt';
@@ -46,7 +46,7 @@ export async function GET(request, { params }) {
 
     const record = result.rows[0];
 
-    // Descifrar datos
+    // Descifrar datos (ahora incluye DNI dentro)
     let datosDescifrados;
     try {
       datosDescifrados = decryptJSON(
@@ -66,7 +66,7 @@ export async function GET(request, { params }) {
       success: true,
       record: {
         id: record.id,
-        dni: record.dni,
+        dni: datosDescifrados.dni,
         datos: datosDescifrados,
         createdAt: record.created_at,
         updatedAt: record.updated_at
@@ -118,15 +118,17 @@ export async function POST(request) {
     // Descifrar todos los registros
     const registros = result.rows.map(record => {
       try {
+        // Descifrar datos completos
         const datos = decryptJSON(record.encrypted_data, record.iv, record.auth_tag);
+        
         return {
           id: record.id,
-          dni: record.dni,
+          dni: datos.dni,
           nombreCompleto: datos.nombreCompleto,
           createdAt: record.created_at
         };
       } catch (error) {
-        console.error(`Error descifrando registro ${record.id}`);
+        console.error(`Error descifrando registro ${record.id}:`, error);
         return null;
       }
     }).filter(Boolean);

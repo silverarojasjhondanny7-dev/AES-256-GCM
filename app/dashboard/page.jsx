@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search, FileText, User, Shield, Clock, CheckCircle, XCircle, Settings, LogOut, ChevronDown } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -136,9 +137,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                  <FileText size={20} strokeWidth={2} className="text-white" />
                 </div>
                 <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-gray-800"></div>
               </div>
@@ -165,9 +164,7 @@ export default function DashboardPage() {
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">{user.email}</p>
                 </div>
-                <svg className="w-4 h-4 text-gray-400 transition-transform ml-2" style={{transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown size={16} strokeWidth={2} className={`text-gray-400 transition-transform ml-2 ${showUserMenu ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
@@ -179,16 +176,11 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-1.5">
                     <button className="w-full text-left px-2.5 py-2 text-xs text-gray-300 hover:bg-gray-700 rounded-md transition flex items-center gap-3">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
+                      <User size={16} strokeWidth={2} />
                       <span>Mi Perfil</span>
                     </button>
                     <button className="w-full text-left px-2.5 py-2 text-xs text-gray-300 hover:bg-gray-700 rounded-md transition flex items-center gap-3">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                      <Settings size={16} strokeWidth={2} />
                       <span>Configuración</span>
                     </button>
                   </div>
@@ -197,9 +189,7 @@ export default function DashboardPage() {
                       onClick={handleLogout}
                       className="w-full text-left px-2.5 py-2 text-xs text-red-400 hover:bg-red-900 hover:bg-opacity-30 rounded-md transition flex items-center gap-3"
                     >
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
+                      <LogOut size={16} strokeWidth={2} />
                       <span>Cerrar Sesión</span>
                     </button>
                   </div>
@@ -220,9 +210,7 @@ export default function DashboardPage() {
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <Search size={20} strokeWidth={2} className="text-white" />
                   </div>
                   <div className="flex-1">
                     <h2 className="text-base font-bold text-white">Consultar DNI</h2>
@@ -235,9 +223,7 @@ export default function DashboardPage() {
                 {error && (
                   <div className="bg-red-500 bg-opacity-10 border border-red-500 border-opacity-50 rounded-lg p-3">
                     <div className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
+                      <XCircle size={20} strokeWidth={2} className="text-red-400 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-red-400 font-medium text-xs">Error en la consulta</p>
                         <p className="text-red-300 text-xs mt-0.5">{error}</p>
@@ -247,14 +233,12 @@ export default function DashboardPage() {
                 )}
 
                 {successMessage && (
-                  <div className="bg-green-500 bg-opacity-10 border border-green-500 border-opacity-50 rounded-lg p-3">
+                  <div className="bg-emerald-500 bg-opacity-10 border border-emerald-500 border-opacity-50 rounded-lg p-3">
                     <div className="flex items-start gap-4">
-                      <svg className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
+                      <CheckCircle size={20} strokeWidth={2} className="text-emerald-400 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-green-400 font-medium text-xs">Consulta exitosa</p>
-                        <p className="text-green-300 text-xs mt-0.5">{successMessage}</p>
+                        <p className="text-emerald-400 font-medium text-xs">Consulta exitosa</p>
+                        <p className="text-emerald-300 text-xs mt-0.5">{successMessage}</p>
                       </div>
                     </div>
                   </div>
@@ -290,9 +274,7 @@ export default function DashboardPage() {
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <Search size={16} strokeWidth={2} />
                         <span>Buscar Información</span>
                       </>
                     )}
@@ -301,41 +283,84 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Resultado */}
+            {/* Resultado MEJORADO */}
             {resultado && (
-              <div className="fade-in bg-gray-800 border border-green-500 border-opacity-30 rounded-xl shadow-xl overflow-hidden">
-                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-3.5">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 className="text-base font-bold text-white">Información Encontrada</h3>
+              <div className="fade-in bg-gradient-to-br from-gray-800 to-gray-900 border border-emerald-500/30 rounded-xl shadow-2xl overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                        <CheckCircle size={20} strokeWidth={2} className="text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-white">Información Encontrada</h3>
+                        <p className="text-emerald-100 text-xs mt-0.5">Datos verificados por RENIEC</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-white/20 px-3 py-1.5 rounded-lg">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      <span className="text-white text-xs font-medium">Verificado</span>
+                    </div>
                   </div>
                 </div>
-                <div className="p-5 space-y-3">
-                  <div className="bg-gray-700 rounded-lg p-3 border border-gray-600">
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Nombre Completo</p>
-                    <p className="text-lg font-bold text-white">{resultado.nombreCompleto}</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    <div className="bg-gray-700 rounded-lg p-2.5 border border-gray-600">
-                      <p className="text-xs text-gray-400 mb-0.5">Nombres</p>
-                      <p className="text-xs font-semibold text-white">{resultado.nombres}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-2.5 border border-gray-600">
-                      <p className="text-xs text-gray-400 mb-0.5">Ap. Paterno</p>
-                      <p className="text-xs font-semibold text-white">{resultado.apellidoPaterno}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-2.5 border border-gray-600">
-                      <p className="text-xs text-gray-400 mb-0.5">Ap. Materno</p>
-                      <p className="text-xs font-semibold text-white">{resultado.apellidoMaterno}</p>
+
+                <div className="p-5 space-y-4">
+                  {/* Nombre Completo - Destacado */}
+                  <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-xl p-4 border border-indigo-500/30">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-indigo-600/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <User size={20} strokeWidth={2} className="text-indigo-300" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-indigo-300 uppercase tracking-wider mb-1">Nombre Completo</p>
+                        <p className="text-xl font-bold text-white">{resultado.nombreCompleto}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-700">
-                    <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <p className="text-xs text-gray-400">Almacenado con cifrado AES-256-GCM</p>
+
+                  {/* Grid de Detalles */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50 hover:border-purple-600/50 transition">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-purple-600/20 rounded flex items-center justify-center">
+                          <User size={14} strokeWidth={2} className="text-purple-400" />
+                        </div>
+                        <p className="text-xs text-gray-400">Nombres</p>
+                      </div>
+                      <p className="text-sm font-semibold text-white">{resultado.nombres}</p>
+                    </div>
+
+                    <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50 hover:border-blue-600/50 transition">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-blue-600/20 rounded flex items-center justify-center">
+                          <User size={14} strokeWidth={2} className="text-blue-400" />
+                        </div>
+                        <p className="text-xs text-gray-400">Ap. Paterno</p>
+                      </div>
+                      <p className="text-sm font-semibold text-white">{resultado.apellidoPaterno}</p>
+                    </div>
+
+                    <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50 hover:border-cyan-600/50 transition">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-cyan-600/20 rounded flex items-center justify-center">
+                          <User size={14} strokeWidth={2} className="text-cyan-400" />
+                        </div>
+                        <p className="text-xs text-gray-400">Ap. Materno</p>
+                      </div>
+                      <p className="text-sm font-semibold text-white">{resultado.apellidoMaterno}</p>
+                    </div>
+                  </div>
+
+                  {/* Footer con Seguridad */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <Shield size={16} strokeWidth={2} className="text-emerald-400" />
+                      <p className="text-xs text-gray-400">Cifrado AES-256-GCM</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Clock size={14} strokeWidth={2} />
+                      <span className="text-xs">{new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -348,9 +373,7 @@ export default function DashboardPage() {
               <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-3">
-                    <svg className="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Clock size={16} strokeWidth={2} className="text-indigo-400" />
                     <h2 className="text-sm font-bold text-white">Historial</h2>
                   </div>
                   <span className="bg-indigo-500 bg-opacity-20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-semibold">
@@ -363,9 +386,7 @@ export default function DashboardPage() {
               <div className="p-2.5 max-h-[calc(100vh-220px)] overflow-y-auto space-y-2">
                 {historial.length === 0 ? (
                   <div className="text-center py-8">
-                    <svg className="w-10 h-10 text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <FileText size={40} strokeWidth={1.5} className="text-gray-600 mx-auto mb-2" />
                     <p className="text-gray-400 text-xs font-medium">Sin consultas</p>
                     <p className="text-gray-600 text-xs mt-0.5">Realiza tu primera búsqueda</p>
                   </div>

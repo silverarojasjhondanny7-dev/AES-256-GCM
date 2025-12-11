@@ -1,4 +1,4 @@
-// app/api/dni/consultar/route.js
+// app/api/dni/consultar/route.js - Consulta DNI con encriptación total
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { verifyToken, extractToken } from '@/lib/jwt';
@@ -29,7 +29,7 @@ export async function POST(request) {
       );
     }
 
-    // Obtener y validar DNI del body
+    // Obtener y validar DNI
     const body = await request.json();
     const { dni } = body;
 
@@ -56,7 +56,6 @@ export async function POST(request) {
     } catch (error) {
       console.error('[API Peru] Error:', error.message);
       
-      // Manejo específico de errores
       if (error.message.includes('no encontrado')) {
         return NextResponse.json(
           { success: false, error: 'DNI no encontrado en RENIEC' }, 
@@ -77,8 +76,9 @@ export async function POST(request) {
       );
     }
 
-    // Preparar datos a cifrar
+    // Preparar datos a cifrar (INCLUYE EL DNI AQUÍ)
     const datosACifrar = {
+      dni: dni, // ← AGREGAMOS EL DNI AQUÍ
       nombres: datosReniec.nombres,
       apellidoPaterno: datosReniec.apellidoPaterno,
       apellidoMaterno: datosReniec.apellidoMaterno,
@@ -87,13 +87,10 @@ export async function POST(request) {
 
     console.log('[DNI] Datos obtenidos:', datosACifrar.nombreCompleto);
 
-    // Cifrar datos
-    let encrypted, iv, authTag;
+    // Cifrar TODO (DNI + datos RENIEC juntos)
+    let encryptedData;
     try {
-      const cifrado = encryptJSON(datosACifrar);
-      encrypted = cifrado.encrypted;
-      iv = cifrado.iv;
-      authTag = cifrado.authTag;
+      encryptedData = encryptJSON(datosACifrar);
     } catch (cryptoError) {
       console.error('[Crypto Error]', cryptoError.message);
       return NextResponse.json(
@@ -102,7 +99,7 @@ export async function POST(request) {
       );
     }
 
-    // Guardar en PostgreSQL
+    // Guardar en PostgreSQL (DNI en texto plano en la columna dni)
     let record;
     try {
       const result = await pool.query(
@@ -115,7 +112,13 @@ export async function POST(request) {
            auth_tag = EXCLUDED.auth_tag,
            updated_at = CURRENT_TIMESTAMP
          RETURNING id, dni, created_at`,
-        [userPayload.id, dni, encrypted, iv, authTag]
+        [
+          userPayload.id, 
+          dni, // ← DNI en texto plano (para búsquedas)
+          encryptedData.encrypted, 
+          encryptedData.iv, 
+          encryptedData.authTag
+        ]
       );
       record = result.rows[0];
       console.log('[DB] Registro guardado con ID:', record.id);
@@ -127,21 +130,48 @@ export async function POST(request) {
       );
     }
 
-    // Registrar en audit_log
+    // Registrar en audit_log CON DATOS ENCRIPTADOS
     try {
+      const dniEncrypted = encryptJSON({ dni });
+      
+      const ipEncrypted = encryptJSON({ 
+        ip: request.headers.get('x-forwarded-for') || 'unknown' 
+      });
+
+      const userAgentEncrypted = encryptJSON({ 
+        userAgent: request.headers.get('user-agent') || 'unknown' 
+      });
+
       await pool.query(
-        'INSERT INTO audit_log (user_id, action, dni) VALUES ($1, $2, $3)',
-        [userPayload.id, 'CONSULTA_DNI', dni]
+        'INSERT INTO audit_log (user_id, action, dni, ip_address, user_agent) VALUES ($1, $2, $3, $4, $5)',
+        [
+          userPayload.id,
+          'CONSULTA_DNI',
+          JSON.stringify({
+            encrypted: dniEncrypted.encrypted,
+            iv: dniEncrypted.iv,
+            authTag: dniEncrypted.authTag
+          }),
+          JSON.stringify({
+            encrypted: ipEncrypted.encrypted,
+            iv: ipEncrypted.iv,
+            authTag: ipEncrypted.authTag
+          }),
+          JSON.stringify({
+            encrypted: userAgentEncrypted.encrypted,
+            iv: userAgentEncrypted.iv,
+            authTag: userAgentEncrypted.authTag
+          })
+        ]
       );
     } catch (auditError) {
       console.error('[Audit Log] Error:', auditError.message);
-      // No es crítico, continuar
     }
 
     // Respuesta exitosa
     return NextResponse.json({
       success: true,
-      message: 'DNI consultado y guardado exitosamente',
+      message: 'DNI consultado y guardado exitosamente (encriptado)',
       record: {
         id: record.id,
         dni: record.dni,
